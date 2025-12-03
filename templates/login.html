@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Sistema Gestione Consegne Droni{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">🔐 Accedi</h2>
+                    
+                    <div id="loginError" class="alert alert-danger d-none"></div>
+                    
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Accedi</button>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-0">Non hai un account? <a href="/register">Registrati</a></p>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <small class="text-muted">
+                            <strong>Account di test:</strong><br>
+                            Admin: admin@mail.com / admin123<br>
+                            Cliente: mario.rossi@mail.com / pass123
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.classList.add('d-none');
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    try {
+        const user = await login(email, password);
+        
+        // Redirect in base al ruolo
+        if (user.role === 'admin') {
+            window.location.href = '/admin';
+        } else {
+            window.location.href = '/customer';
+        }
+    } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('d-none');
+    }
+});
+</script>
+{% endblock %}

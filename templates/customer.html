@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Cliente - Sistema Gestione Consegne Droni{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">📦 I Miei Ordini</h1>
+    
+    <div class="row">
+        <!-- Lista Ordini -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">I Tuoi Ordini</h5>
+                </div>
+                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                    <div id="ordersList">
+                        <div class="text-center text-muted py-5">
+                            <div class="spinner-border" role="status"></div>
+                            <p class="mt-2">Caricamento ordini...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dettaglio Ordine -->
+        <div class="col-md-8">
+            <div id="orderDetail" class="card d-none">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Dettaglio Ordine #<span id="detailOrderId"></span></h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Tipo:</strong> <span id="detailType"></span></p>
+                            <p><strong>Peso:</strong> <span id="detailWeight"></span> kg</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Indirizzo:</strong> <span id="detailAddress"></span></p>
+                            <p><strong>Stato:</strong> <span id="detailStatus" class="badge"></span></p>
+                        </div>
+                    </div>
+                    
+                    <h6>Prodotti:</h6>
+                    <div id="detailProducts" class="mb-3"></div>
+                    
+                    <h6>Missione:</h6>
+                    <div id="detailMission"></div>
+                </div>
+            </div>
+            
+            <!-- Mappa Tracking -->
+            <div id="mapContainer" class="card mt-3 d-none">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">📍 Tracking Live</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 400px;"></div>
+                </div>
+            </div>
+            
+            <!-- Form Valutazione -->
+            <div id="ratingForm" class="card mt-3 d-none">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">⭐ Valuta la Consegna</h5>
+                </div>
+                <div class="card-body">
+                    <form id="submitRatingForm">
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Valutazione (1-10):</label>
+                            <input type="number" class="form-control" id="rating" min="1" max="10" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Commento:</label>
+                            <textarea class="form-control" id="comment" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Invia Valutazione</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Placeholder iniziale -->
+            <div id="selectOrderPlaceholder" class="card">
+                <div class="card-body text-center text-muted py-5">
+                    <h3>👈</h3>
+                    <p>Seleziona un ordine dalla lista per vedere i dettagli</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/app_client.js') }}"></script>
+{% endblock %}

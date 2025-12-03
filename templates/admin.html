@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - Sistema Gestione Consegne Droni{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-card {
+        border-left: 4px solid;
+    }
+    .kpi-card.in-progress { border-left-color: #ffc107; }
+    .kpi-card.completed { border-left-color: #28a745; }
+    .kpi-card.cancelled { border-left-color: #dc3545; }
+    .kpi-card.weight { border-left-color: #17a2b8; }
+    .kpi-card.rating { border-left-color: #6f42c1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4">⚙️ Dashboard Admin</h1>
+    
+    <!-- KPI Cards -->
+    <div class="row mb-4">
+        <div class="col-md">
+            <div class="card kpi-card in-progress">
+                <div class="card-body">
+                    <h6 class="text-muted">In Corso</h6>
+                    <h2 id="k_in">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="card kpi-card completed">
+                <div class="card-body">
+                    <h6 class="text-muted">Completate</h6>
+                    <h2 id="k_ok">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="card kpi-card cancelled">
+                <div class="card-body">
+                    <h6 class="text-muted">Annullate</h6>
+                    <h2 id="k_cancel">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="card kpi-card weight">
+                <div class="card-body">
+                    <h6 class="text-muted">Peso Medio</h6>
+                    <h2 id="k_peso">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="card kpi-card rating">
+                <div class="card-body">
+                    <h6 class="text-muted">Voto Medio</h6>
+                    <h2 id="k_voto">-</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="drones-tab" data-bs-toggle="tab" data-bs-target="#drones">Droni</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pilots-tab" data-bs-toggle="tab" data-bs-target="#pilots">Piloti</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="missions-tab" data-bs-toggle="tab" data-bs-target="#missions">Missioni</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats">Statistiche</button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="adminTabsContent">
+        <!-- Tab Droni -->
+        <div class="tab-pane fade show active" id="drones">
+            <div class="card mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Gestione Droni</h5>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#droneModal" onclick="openDroneModal()">+ Aggiungi Drone</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Modello</th>
+                                    <th>Batteria (%)</th>
+                                    <th>Capacità (kg)</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dronesTable">
+                                <tr><td colspan="5" class="text-center">Caricamento...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab Piloti -->
+        <div class="tab-pane fade" id="pilots">
+            <div class="card mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Gestione Piloti</h5>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#pilotModal" onclick="openPilotModal()">+ Aggiungi Pilota</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Cognome</th>
+                                    <th>Turno</th>
+                                    <th>Brevetto</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pilotsTable">
+                                <tr><td colspan="6" class="text-center">Caricamento...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab Missioni -->
+        <div class="tab-pane fade" id="missions">
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-3">Gestione Missioni</h5>
+                    <div class="row g-2">
+                        <div class="col-md-2">
+                            <select class="form-select form-select-sm" id="f_stato">
+                                <option value="">Tutti gli stati</option>
+                                <option value="in corso">In corso</option>
+                                <option value="completata">Completata</option>
+                                <option value="annullata">Annullata</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select form-select-sm" id="f_pilota">
+                                <option value="">Tutti i piloti</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select form-select-sm" id="f_drone">
+                                <option value="">Tutti i droni</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" class="form-control form-control-sm" id="f_dal" placeholder="Dal">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" class="form-control form-control-sm" id="f_al" placeholder="Al">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary btn-sm w-100" onclick="loadMissions()">Filtra</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-success btn-sm mb-3" onclick="exportCSV()">📥 Esporta CSV</button>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Data</th>
+                                    <th>Ora</th>
+                                    <th>Drone</th>
+                                    <th>Pilota</th>
+                                    <th>Stato</th>
+                                    <th>Valutazione</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="missionsTable">
+                                <tr><td colspan="8" class="text-center">Caricamento...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab Statistiche -->
+        <div class="tab-pane fade" id="stats">
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Statistiche Missioni</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statsChart" width="400" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Drone -->
+<div class="modal fade" id="droneModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="droneModalTitle">Aggiungi Drone</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="droneForm">
+                <div class="modal-body">
+                    <input type="hidden" id="droneId">
+                    <div class="mb-3">
+                        <label for="droneModel" class="form-label">Modello</label>
+                        <input type="text" class="form-control" id="droneModel" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="droneBattery" class="form-label">Batteria (%)</label>
+                        <input type="number" class="form-control" id="droneBattery" min="0" max="100" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="droneCapacity" class="form-label">Capacità (kg)</label>
+                        <input type="number" step="0.1" class="form-control" id="droneCapacity" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Pilota -->
+<div class="modal fade" id="pilotModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pilotModalTitle">Aggiungi Pilota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="pilotForm">
+                <div class="modal-body">
+                    <input type="hidden" id="pilotId">
+                    <div class="mb-3">
+                        <label for="pilotName" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="pilotName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pilotSurname" class="form-label">Cognome</label>
+                        <input type="text" class="form-control" id="pilotSurname" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pilotShift" class="form-label">Turno</label>
+                        <input type="text" class="form-control" id="pilotShift" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pilotLicense" class="form-label">Brevetto</label>
+                        <input type="text" class="form-control" id="pilotLicense" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="{{ url_for('static', filename='js/app_admin.js') }}"></script>
+{% endblock %}

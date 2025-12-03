@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Registrazione - Sistema Gestione Consegne Droni{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">📝 Registrati</h2>
+                    
+                    <div id="registerError" class="alert alert-danger d-none"></div>
+                    
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nome completo</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required minlength="6">
+                            <small class="text-muted">Minimo 6 caratteri</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Registrati</button>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-0">Hai già un account? <a href="/login">Accedi</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const errorDiv = document.getElementById('registerError');
+    errorDiv.classList.add('d-none');
+    
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    try {
+        const user = await register(name, email, password);
+        
+        // Redirect a dashboard cliente (tutti i nuovi utenti sono clienti)
+        window.location.href = '/customer';
+    } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('d-none');
+    }
+});
+</script>
+{% endblock %}
